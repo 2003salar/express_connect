@@ -1,10 +1,9 @@
 const express = require('express');
 const app = express();
+const expressConnectRouter = require('./routers/express_connect');
 require('dotenv').config();
 
-app.get('/', (req, res) => {
-    res.status(200).json({success: true, message: 'Worked Again'});
-});
+app.use('/', expressConnectRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
