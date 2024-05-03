@@ -153,8 +153,8 @@ const Posts_Tags = sequelize.define('Posts_Tags', {
         references: {
             model: Tags,
             key: 'id',
+            onDelete: 'CASCADE',
         },
-        onDelete: 'CASCADE',
         allowNull: false,
     },
 }, {
