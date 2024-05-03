@@ -88,7 +88,7 @@ const Comments = sequelize.define('Comments', {
     },
     user_id: {
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
         references: {
             model: Users,
             key: 'id',
@@ -97,6 +97,7 @@ const Comments = sequelize.define('Comments', {
     },
     post_id: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         references: {
             model: Posts,
             key: 'id',
