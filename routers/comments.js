@@ -34,7 +34,8 @@ router.get('/:postId/:commentId', isUserAuthenticated, async (req, res) => {
     } catch (error) {
         
     }
-})
+});
+
 // Comment in a post
 router.post('/:id', isUserAuthenticated, async (req, res) => {
     try {
@@ -73,9 +74,30 @@ router.post('/:id', isUserAuthenticated, async (req, res) => {
     }
     
 });
+
 // Reply to a comment
 // Edit a comment if the user is the commentor
 
 // Delete a comment if the users is the commentor
-
+router.delete('/:id', isUserAuthenticated, async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id || isNaN(id)) {
+            return res.status(400).json({success: false, message: 'Invalid id'});
+        }
+        const comment = await Comments.findByPk(id);
+        if (!comment) {
+            return res.status(404).json({success: false, message: 'Comment not found'});
+        }
+        await Comments.destroy({
+            where: {
+                id,
+                user_id: req.user.id,
+            },
+        });
+        res.status(201).json({success: true, message: 'Comment successfully deleted'});
+    } catch (error) {
+        
+    }
+});
 module.exports = router;
