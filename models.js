@@ -119,7 +119,7 @@ const Comments = sequelize.define('Comments', {
 }, {
     tableName: 'comments',
     timestamps: true,
-    createdAt: 'create_at',
+    createdAt: 'created_at',
     updatedAt: 'updated_at',
 });
 
@@ -165,6 +165,7 @@ const Post_Tags = sequelize.define('Posts_Tags', {
 });
 
 Posts.belongsTo(Users, {foreignKey: 'user_id', as: 'user'});
+Posts.hasMany(Comments, {foreignKey: 'post_id', as: 'comments'});
 Comments.belongsTo(Users, {foreignKey: 'user_id', as: 'user'});
 Comments.belongsTo(Posts, {foreignKey: 'post_id', as: 'post'});
 Comments.belongsTo(Comments, { as: 'ParentComment', foreignKey: 'parent_comment_id' });
