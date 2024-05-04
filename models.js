@@ -138,18 +138,20 @@ const Tags = sequelize.define('Tags', {
     timestamps: false,
 });
 
-const Posts_Tags = sequelize.define('Posts_Tags', {
+const Post_Tags = sequelize.define('Posts_Tags', {
     post_id: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Posts,
             key: 'id',
+            onDelete: 'CASCADE',
         },
-        onDelete: 'CASCADE',
         allowNull: false,
     },
     tag_id: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Tags,
             key: 'id',
@@ -158,7 +160,7 @@ const Posts_Tags = sequelize.define('Posts_Tags', {
         allowNull: false,
     },
 }, {
-    tableName: 'posts_tags',
+    tableName: 'post_tags',
     timestamps: false,
 });
 
@@ -166,13 +168,13 @@ Posts.belongsTo(Users, {foreignKey: 'user_id', as: 'user'});
 Comments.belongsTo(Users, {foreignKey: 'user_id', as: 'user'});
 Comments.belongsTo(Posts, {foreignKey: 'post_id', as: 'post'});
 Comments.belongsTo(Comments, { as: 'ParentComment', foreignKey: 'parent_comment_id' });
-Posts_Tags.belongsTo(Posts, {foreignKey: 'post_id', as: 'post'});
-Posts_Tags.belongsTo(Tags, {foreignKey: 'tag_id', as: 'tag'});
+Post_Tags.belongsTo(Posts, {foreignKey: 'post_id', as: 'post'});
+Post_Tags.belongsTo(Tags, {foreignKey: 'tag_id', as: 'tag'});
 
 module.exports = {
     Users,
     Posts,
     Comments,
     Tags,
-    Posts_Tags,
+    Post_Tags,
 };
