@@ -9,6 +9,7 @@ const initializePassport = require('../passportConfig');
 const isUserAuthenticated = require('./isUserAuthenticated');
 const {Users} = require('../models');
 const postsRouter = require('./posts');
+const commentsRouter = require('./comments');
 require('dotenv').config();
 
 const sessionStore = new PgSimple({
@@ -95,5 +96,5 @@ router.get('/logout', isUserAuthenticated, (req, res) => {
 });
 
 router.use('/posts', postsRouter);
-
+router.use('/comments', commentsRouter);
 module.exports = router;
