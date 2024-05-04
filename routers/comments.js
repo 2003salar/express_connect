@@ -89,15 +89,20 @@ router.delete('/:id', isUserAuthenticated, async (req, res) => {
         if (!comment) {
             return res.status(404).json({success: false, message: 'Comment not found'});
         }
-        await Comments.destroy({
+        const deletionCount = await Comments.destroy({
             where: {
                 id,
                 user_id: req.user.id,
             },
         });
+        console.log(deletionCount)
+        if (deletionCount === 0) {
+            return res.status(403).json({success: false, message: 'Permission denied'});
+        }
         res.status(201).json({success: true, message: 'Comment successfully deleted'});
     } catch (error) {
-        
+        console.log(error);
+        res.status(500).json({success: false, message: 'Server error'});
     }
 });
 module.exports = router;
