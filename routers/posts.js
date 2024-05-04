@@ -3,39 +3,6 @@ const router = express.Router();
 const isUserAuthenticated = require('./isUserAuthenticated');
 const {Users, Posts, Comments, Tags, Post_Tags} = require('../models');
 
-// Get a specific post
-router.get('/:id', isUserAuthenticated, async (req, res) => {
-    try {
-        const { id } = req.params;
-        if (!id || isNaN(id)) {
-            return res.status(400).json({success: false, message: 'Invalid id'});
-        }
-        const post = await Posts.findByPk(id, {
-            include: [
-                {
-                    model: Comments,
-                    as: 'comments',
-                    include:  [
-                        {
-                            model: Users,
-                            as: 'user',
-                            attributes: ['id', 'username'],
-                        },
-                    ],
-                },
-            ],
-        });
-        if (!post) {
-            return res.status(404).json({success: false, message: 'Post not found'});
-        }
-        console.log(post)
-        res.status(200).json({success: true, data: post});  
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({success: false, message: 'Server error'});
-    }    
-});
-
 // get all posts with their creator users
 router.get('/', isUserAuthenticated, async (req, res) => {
     try {
@@ -73,6 +40,74 @@ router.post('/', isUserAuthenticated, async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({success: false, message: 'Server error'});
+    }
+});
+
+// Get a specific post
+router.get('/:id', isUserAuthenticated, async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id || isNaN(id)) {
+            return res.status(400).json({success: false, message: 'Invalid id'});
+        }
+        const post = await Posts.findByPk(id, {
+            include: [
+                {
+                    model: Comments,
+                    as: 'comments',
+                    include:  [
+                        {
+                            model: Users,
+                            as: 'user',
+                            attributes: ['id', 'username'],
+                        },
+                    ],
+                },
+            ],
+        });
+        if (!post) {
+            return res.status(404).json({success: false, message: 'Post not found'});
+        }
+        console.log(post)
+        res.status(200).json({success: true, data: post});  
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({success: false, message: 'Server error'});
+    }    
+});
+
+// Edit a post 
+router.patch('/:id', isUserAuthenticated, async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id || isNaN(id)) {
+            return res.status(400).json({success: false, message: 'Invalid project'});
+        }
+        const post = await Posts.findByPk(id);
+        if (!post) {
+            return res.status(404).json({success: false, message: 'Post not found'});
+        }
+        if (post.user_id !== req.user.id) {
+            return res.status(403).json({success: false, message: 'Access denied'});
+        }
+        
+        const updatedParts = {...req.body};
+        delete updatedParts.created_at;
+        delete updatedParts.updated_at;
+        delete updatedParts.user_id;
+
+        await Posts.update(updatedParts, {
+            where: {
+                id,
+                user_id: req.user.id,
+            },
+        });
+
+        const updatedPost = await Posts.findByPk(id);
+        res.status(200).json({success: true, message: updatedPost});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({success: false, message: 'Servere error'});
     }
 });
 
