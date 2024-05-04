@@ -76,7 +76,42 @@ router.post('/:id', isUserAuthenticated, async (req, res) => {
 });
 
 // Reply to a comment
+
 // Edit a comment if the user is the commentor
+router.patch('/:id', isUserAuthenticated, async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id || isNaN(id)) {
+            return res.status(400).json({success: false, message: 'Invalid comment id'});
+        }
+        const comment = await Comments.findByPk(id);
+        if (!comment) {
+            return res.status(404).json({success: false, message: 'Comment not found'});
+        }
+        if (comment.user_id !== req.user.id) {
+            return res.status(403).json({success: false, message: 'Permission denied'});
+        }
+
+        const updatedParts = {...req.body};
+        delete updatedParts.created_at;
+        delete updatedParts.updated_at;
+        delete updatedParts.user_id;
+        delete updatedParts.post_id;
+
+        await Comments.update(updatedParts, {
+            where: {
+                id,
+                user_id: req.user.id,
+            },
+        });
+
+        const updatedComment = await Comments.findByPk(id);
+        res.status(200).json({success: true, data: updatedComment});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({success: false, message: 'Server error'});
+    }
+});
 
 // Delete a comment if the users is the commentor
 router.delete('/:id', isUserAuthenticated, async (req, res) => {
