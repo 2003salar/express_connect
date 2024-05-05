@@ -4,29 +4,33 @@ const isUserAuthenticated = require('./isUserAuthenticated');
 const { Users, Posts, Comments } = require('../models');
  
 // Get a specific comment in a post 
-// Add replies as well
-router.get('/:postId/:commentId', isUserAuthenticated, async (req, res) => {
+router.get('/:commentId', isUserAuthenticated, async (req, res) => {
     try {
-        const { postId, commentId } = req.params;
-        if (!postId || isNaN(postId)) {
-            return res.status(400).json({success: false, message: 'Invalid post'});
-        }
+        const { commentId } = req.params;
         if (!commentId || isNaN(commentId)) {
             return res.status(400).json({success: false, message: 'Invalid comment id'});
         }
         const comment = await Comments.findOne({
             where: {
                 id: commentId,
-                post_id: postId,
             }, 
                 include: [
                     {
                         model: Users,
                         as: 'user',
                         attributes: ['id', 'username'],
-                    }
+                    }, {
+                        model: Comments,
+                        as: 'replies',
+                        include: [
+                            {
+                                model: Users,
+                                as: 'user',
+                                attributes: ['id', 'username'],
+                            },
+                        ],
+                    },
                 ],
-            
         });
         if (!comment) {
             return res.status(404).json({success: false, message: 'Comment not found'});
