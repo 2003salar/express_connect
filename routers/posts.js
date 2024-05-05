@@ -12,7 +12,29 @@ router.get('/', isUserAuthenticated, async (req, res) => {
                     model: Users,
                     as: 'user',
                     attributes: ['id', 'username'],
-                }
+                }, {
+                    model: Comments,
+                    as: 'comments',
+                    include: [
+                        {
+                            model: Users,
+                            as: 'user',
+                            include: [
+                                {
+                                    model: Comments,
+                                    as: 'comments',
+                                    include: [
+                                        {
+                                            model: Users,
+                                            as: 'user',
+                                            attributes: ['id', 'username'],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
             ],
             order: [['created_at', 'DESC']],
         });
@@ -61,6 +83,17 @@ router.get('/:id', isUserAuthenticated, async (req, res) => {
                             as: 'user',
                             attributes: ['id', 'username'],
                         },
+                        {
+                            model: Comments,
+                            as: 'replies',
+                            include: [
+                                {
+                                    model: Users,
+                                    as: 'user',
+                                    attributes: ['id', 'username'],
+                                },
+                            ],
+                        },
                     ],
                 },
             ],
@@ -68,7 +101,6 @@ router.get('/:id', isUserAuthenticated, async (req, res) => {
         if (!post) {
             return res.status(404).json({success: false, message: 'Post not found'});
         }
-        console.log(post)
         res.status(200).json({success: true, data: post});  
     } catch (error) {
         console.log(error);

@@ -164,6 +164,7 @@ const Post_Tags = sequelize.define('Posts_Tags', {
     timestamps: false,
 });
 
+Users.hasMany(Comments, {foreignKey: 'user_id', as: 'comments'});
 Posts.belongsTo(Users, {foreignKey: 'user_id', as: 'user'});
 Posts.hasMany(Comments, {foreignKey: 'post_id', as: 'comments'});
 Comments.belongsTo(Users, {foreignKey: 'user_id', as: 'user'});
