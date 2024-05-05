@@ -111,4 +111,32 @@ router.patch('/:id', isUserAuthenticated, async (req, res) => {
     }
 });
 
+// Delete a post if the creator is the user
+router.delete('/:id', isUserAuthenticated, async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id || isNaN(id)) {
+            return res.status(400).json({success: false, message: 'Invalid post id'});
+        }
+        const post = await Posts.findByPk(id);
+        if (!post) {
+            return res.status(404).json({success: false, message: 'Post not found'});
+        }
+        if (post.user_id !== req.user.id) {
+            return res.status(400).json({success: false, messgae: 'Access denied'});
+        }
+        const deletionCount = await Posts.destroy({
+            where: {
+                id,
+            }
+        }); 
+        if (deletionCount === 0) {
+            return res.status(403).json({success: false, message: 'Access denied'});
+        }
+        res.status(201).json({success: true, messgae: 'Post successfully deleted'});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({success: false, message: 'Server error'});
+    }
+});
 module.exports = router;
