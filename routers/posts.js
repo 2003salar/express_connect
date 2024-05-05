@@ -19,6 +19,7 @@ router.get('/', isUserAuthenticated, async (req, res) => {
                         {
                             model: Users,
                             as: 'user',
+                            attributes: ['id', 'username'],
                             include: [
                                 {
                                     model: Comments,
