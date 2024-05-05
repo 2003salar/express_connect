@@ -3,7 +3,8 @@ const router = express.Router();
 const isUserAuthenticated = require('./isUserAuthenticated');
 const { Users, Posts, Comments } = require('../models');
  
-// Get a specific comment in a post
+// Get a specific comment in a post 
+// Add replies as well
 router.get('/:postId/:commentId', isUserAuthenticated, async (req, res) => {
     try {
         const { postId, commentId } = req.params;
@@ -76,6 +77,59 @@ router.post('/:id', isUserAuthenticated, async (req, res) => {
 });
 
 // Reply to a comment
+router.post('/reply/:postId/:parentId', isUserAuthenticated, async (req, res) => {
+    try {
+        const { parentId, postId } = req.params;
+        if (!parentId || isNaN(parentId)) {
+            return res.status(400).json({success: false, message: 'Invalid parent id'});
+        } 
+        if (!postId || isNaN(postId)) {
+            return res.status(400).json({success: false, messgae: 'Invalid post id'});
+        }
+        const parentComment = await Comments.findByPk(parentId);
+        if (!parentComment) {
+            return res.status(404).json({success: false, message: 'Comment not found'});
+        } 
+
+        const post = await Posts.findByPk(postId);
+        if (!post) {
+            return res.status(404).json({success: false, message: 'Post not found'})
+        }
+        
+        const { content } = req.body;
+        if (!content) {
+            return res.status(400).json({success: false, messgae: 'Missing required fields'});
+        }
+
+        const newReply = await Comments.create({
+            user_id: req.user.id,
+            post_id: postId,
+            parent_comment_id: parentId,
+            content,
+        });
+        
+        const commentWithReply = await Comments.findByPk(parentId, {
+            include: [
+                {
+                    model: Comments,
+                    as: 'replies',
+                    attributes: ['user_id', 'post_id', 'content'],
+                    include: [
+                        {
+                            model: Users,
+                            as: 'user',
+                            attributes: ['id', 'username'],
+                        },
+                    ],
+                }, 
+            ],
+        })
+        res.status(200).json({success: true, data: commentWithReply});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({success: false, message: 'Server error'});
+    }
+});
 
 // Edit a comment if the user is the commentor
 router.patch('/:id', isUserAuthenticated, async (req, res) => {
