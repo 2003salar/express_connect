@@ -174,6 +174,18 @@ Comments.belongsTo(Comments, { foreignKey: 'parent_comment_id', as: 'ParentComme
 Post_Tags.belongsTo(Posts, {foreignKey: 'post_id', as: 'post'});
 Post_Tags.belongsTo(Tags, {foreignKey: 'tag_id', as: 'tag'});
 
+const asyncDatabase = async () => {
+    try {
+        await sequelize.authenticate();
+        await sequelize.sync();
+        console.log('Tables created');
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+asyncDatabase();
+
 module.exports = {
     Users,
     Posts,
